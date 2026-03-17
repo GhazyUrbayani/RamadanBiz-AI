@@ -205,7 +205,7 @@ export default function Home() {
       });
       if (!res.ok) throw new Error((await res.text()) || `HTTP ${res.status}`);
       const data = await res.json();
-      const reply = data?.message ?? data?.content ?? data?.reply ?? data?.text ?? "No response received.";
+      const reply = data?.response ?? data?.message ?? data?.content ?? "No response received.";
       setMessages([...newMessages, { role: "assistant", content: reply }]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

@@ -9,8 +9,8 @@
 
 # 🌙 RamadanBiz AI
 
-**Asisten bisnis berbasis AI untuk UMKM Indonesia di bulan Ramadan.**  
-Dibangun di atas platform pembayaran [Mayar](https://mayar.id) dengan agentic AI yang bisa membaca data bisnis secara real-time via natural language.
+**Asisten bisnis berbasis AI untuk UMKM Indonesia di bulan Ramadan.**
+Dibangun di atas platform pembayaran [Mayar](https://mayar.id) dengan agentic AI yang bisa membaca & bertindak atas data bisnis secara real-time via natural language.
 
 [**🚀 Live Demo**](https://ramadan-biz-ai.vercel.app) · [**📖 Docs Mayar**](https://docs.mayar.id) · [**🏆 Vibecoding Competition Ramadhan 2026**](#)
 
@@ -20,12 +20,13 @@ Dibangun di atas platform pembayaran [Mayar](https://mayar.id) dengan agentic AI
 
 ## ✨ Fitur Utama
 
-- 🤖 **Agentic AI** — AI tidak hanya menjawab, tapi bisa *bertindak*: cek saldo, buat invoice, monitor piutang via chat
+- 🤖 **Agentic AI** — AI tidak hanya menjawab, tapi bisa *bertindak*: cek saldo, buat invoice, monitor piutang via chat natural
 - 💬 **Natural Language Interface** — Tidak perlu buka dashboard; cukup ketik seperti chat WhatsApp
-- 📊 **Real-time Business Data** — Terintegrasi langsung dengan Mayar MCP untuk akses data transaksi, customer, produk
+- 🎭 **Demo Mode** — Data sintetis realistis (8 customer, 8 produk, 15 transaksi) siap pakai tanpa perlu akun Mayar
+- 📊 **16 Mayar Tools** — Terintegrasi langsung dengan Mayar MCP untuk akses data transaksi, customer, produk, membership
 - 🌙 **Konteks Ramadan** — Persona dan tone AI dirancang khusus untuk UMKM Ramadan Indonesia
-- 📱 **Responsive UI** — Desain mobile-first dengan tema hijau-emas khas Ramadan
-- ⚡ **Instant Deploy** — Serverless di Vercel, zero-config
+- 📱 **Responsive UI** — Desain mobile-first dengan tema hijau-emas khas Ramadan, markdown renderer custom
+- ⚡ **Serverless** — Zero-config deploy di Vercel, tidak butuh database eksternal
 
 ---
 
@@ -33,16 +34,16 @@ Dibangun di atas platform pembayaran [Mayar](https://mayar.id) dengan agentic AI
 
 ```
 👤 "Berapa saldo Mayar-ku sekarang?"
-🤖 → Cek saldo real-time dari akun Mayar-mu
+🤖 → [panggil get_balance] → Saldo tersedia: Rp 5.230.000
 
-👤 "Buatkan invoice untuk Budi, Hampers Premium, Rp 150.000"
-🤖 → Konfirmasi → Buat invoice → Return link pembayaran
+👤 "Buatkan invoice untuk Budi, Hampers Premium, Rp 350.000"
+🤖 → Konfirmasi detail → [panggil create_invoice] → Return link invoice
 
 👤 "Siapa yang belum bayar minggu ini?"
-🤖 → Tampilkan daftar unpaid invoice beserta insight follow-up
+🤖 → [panggil get_latest_unpaid_transactions] → Tampilkan 3 invoice pending + insight
 
-👤 "Omzetku bulan ini berapa? Analisis produk terlaris."
-🤖 → Ambil data transaksi → Analisis → Rekomendasikan strategi
+👤 "Omzetku bulan ini berapa? Produk apa yang paling laris?"
+🤖 → [panggil get_transactions_by_time_period] → Analisis + rekomendasi strategi
 ```
 
 ---
@@ -55,14 +56,14 @@ User (Chat UI)
       ▼
 Next.js App Router (src/app/)
       │
-      ├── /api/chat/route.ts    ← Agentic loop + LLM
+      ├── /api/chat/route.ts       ← Agentic loop (max 5 iterasi)
       │         │
-      │         ├── HuggingFace Inference (LLM)
-      │         └── Mayar MCP Tools (16 tools)
+      │         ├── HuggingFace router (Llama 3.1 8B Instruct)
+      │         └── Mock Executor (16 tools — demo mode)
       │                   │
-      │                   └── mayar.id API (real-time)
+      │                   └── mock-data.ts (data sintetis)
       │
-      └── page.tsx              ← Chat UI (Tailwind, no deps)
+      └── page.tsx                 ← Chat UI (Tailwind, no deps)
 ```
 
 ### Stack
@@ -71,26 +72,42 @@ Next.js App Router (src/app/)
 |---|---|
 | Framework | Next.js 14 (App Router) |
 | Language | TypeScript |
-| Styling | Tailwind CSS (pure, no component lib) |
-| LLM | HuggingFace — Llama 3.1 8B Instruct |
-| Payment Platform | Mayar MCP (16 tools) |
+| Styling | Tailwind CSS (pure, no component library) |
+| LLM | HuggingFace — Llama 3.1 8B Instruct (free) |
+| Agentic Tools | 16 Mayar Mock Tools (demo mode) |
+| Payment Platform | Mayar MCP (production-ready) |
 | Deployment | Vercel (Serverless) |
 
 ---
 
-## 🛠️ Tools Mayar yang Tersedia
+## 🛠️ 16 Tools Mayar yang Tersedia
 
-AI dapat memanggil 16 tools berikut secara otomatis berdasarkan konteks percakapan:
+AI memanggil tools ini secara otomatis berdasarkan konteks percakapan:
 
 | Kategori | Tools |
 |---|---|
 | 💰 Account | `get_balance` |
 | 📄 Invoice | `create_invoice` |
 | 👤 Customer | `get_customer_detail`, `send_portal_link` |
-| 📊 Transaksi | `get_latest_transactions`, `get_transactions_by_time_period`, `get_transactions_by_time_range`, `get_transactions_by_customer_*`, `get_transactions_by_specific_product` |
+| 📊 Transaksi | `get_latest_transactions`, `get_transactions_by_time_period`, `get_transactions_by_time_range`, `get_transactions_by_customer_and_time_period`, `get_transactions_by_customer_and_time_range`, `get_latest_transactions_by_customer`, `get_transactions_by_specific_product` |
 | ❌ Unpaid | `get_latest_unpaid_transactions`, `get_unpaid_transactions_by_time_range` |
 | 🎫 Membership | `get_membership_customer_by_specific_product`, `get_membership_customer_by_specific_product_and_tier` |
 | 📦 Produk | `get_products` |
+
+---
+
+## 🎭 Demo Data Sintetis
+
+Mode demo sudah dilengkapi data realistis siap pakai tanpa perlu akun Mayar:
+
+| Data | Detail |
+|---|---|
+| 💰 Saldo | Rp 5.230.000 |
+| 👤 Customer | 8 customer (Budi, Siti, Ahmad, Rina, Yusuf, Diana, Hendra, Lestari) |
+| 📦 Produk | 8 produk (hampers, katering, e-book, kelas online, membership, kurma) |
+| ✅ Transaksi Paid | 15 transaksi (3 hari terakhir) |
+| ❌ Unpaid | 3 invoice pending (total Rp 899.000) |
+| 🎫 Membership | 4 member aktif (tier Gold, Silver, Basic) |
 
 ---
 
@@ -99,9 +116,8 @@ AI dapat memanggil 16 tools berikut secara otomatis berdasarkan konteks percakap
 ### Prerequisites
 
 - Node.js 18+
-- npm / yarn
+- npm
 - Akun [HuggingFace](https://huggingface.co) (gratis)
-- Akun [Mayar](https://mayar.id) (opsional, untuk mode live)
 
 ### Instalasi
 
@@ -117,10 +133,8 @@ Buat file `.env.local`:
 
 ```env
 # Wajib — HuggingFace token (gratis di huggingface.co/settings/tokens)
+# Buat token dengan permission: "Make calls to Inference Providers"
 HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxx
-
-# Opsional — Untuk mode live dengan akun Mayar nyata
-MAYAR_API_KEY=your_mayar_api_key
 ```
 
 ### Jalankan Development Server
@@ -135,14 +149,11 @@ Buka [http://localhost:3000](http://localhost:3000).
 
 ## 🌐 Deploy ke Vercel
 
-```bash
-# One-click deploy
-vercel --prod
-```
-
-Atau connect repo ini ke [Vercel Dashboard](https://vercel.com) dan set environment variables:
-- `HF_TOKEN` → token HuggingFace-mu
-- `MAYAR_API_KEY` → API key Mayar (opsional untuk demo)
+1. Fork / clone repo ini
+2. Connect ke [Vercel Dashboard](https://vercel.com)
+3. Set environment variable:
+   - `HF_TOKEN` → token HuggingFace-mu (wajib)
+4. Deploy otomatis setiap push ke `main`
 
 ---
 
@@ -153,16 +164,19 @@ RamadanBiz-AI/
 ├── src/
 │   ├── app/
 │   │   ├── api/chat/
-│   │   │   └── route.ts          # API endpoint + agentic loop
+│   │   │   └── route.ts              # Agentic loop + HuggingFace LLM
 │   │   ├── globals.css
 │   │   ├── layout.tsx
-│   │   └── page.tsx              # Chat UI
+│   │   └── page.tsx                  # Chat UI (markdown, bubbles, animasi)
 │   └── lib/
 │       ├── ai/
-│       │   └── system-prompt.ts  # Persona & instruksi AI
+│       │   └── system-prompt.ts      # Persona & instruksi AI (Ramadan UMKM)
 │       └── mayar/
-│           ├── tool-definitions.ts  # 16 Mayar tools
-│           └── tool-executor.ts     # Mayar MCP caller
+│           ├── tool-definitions.ts   # 16 Mayar tools (Anthropic SDK format)
+│           ├── tool-executor.ts      # Mayar MCP caller (mode live)
+│           ├── mock-data.ts          # 🎭 Data sintetis realistis (demo mode)
+│           └── mock-executor.ts      # 🎭 16 mock tools handler (demo mode)
+├── .gitignore
 ├── next.config.mjs
 ├── package.json
 └── tsconfig.json
@@ -170,9 +184,19 @@ RamadanBiz-AI/
 
 ---
 
+## 🗺️ Roadmap
+
+- [ ] Live mode dengan Mayar API key (production)
+- [ ] Onboarding API key di UI
+- [ ] Riwayat chat persisten (localStorage)
+- [ ] Export laporan ke PDF
+- [ ] Notifikasi unpaid otomatis via WhatsApp
+
+---
+
 ## 🤝 Kontribusi
 
-Pull request dan issue sangat welcome! Untuk perubahan besar, buka issue terlebih dahulu.
+Pull request dan issue sangat welcome! Untuk perubahan besar, buka issue terlebih dahulu untuk diskusi.
 
 ---
 
@@ -186,6 +210,6 @@ MIT License — bebas digunakan dan dimodifikasi.
 
 Dibuat dengan ❤️ untuk **Vibecoding Competition Ramadhan 2026**
 
-**رمضان مبارك** · Selamat Ramadan
+**رمضان مبارك** · Selamat Ramadan 🌙
 
 </div>

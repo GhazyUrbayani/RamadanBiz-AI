@@ -7,7 +7,7 @@ import { executeMayarTool } from "@/lib/mayar/tool-executor";
 
 type ChatRequestBody = {
   messages: MessageParam[];
-  apiKey: string;
+  apiKey?: string;
 };
 
 export async function POST(req: Request) {
